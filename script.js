@@ -106,7 +106,22 @@ function updateMusicButton(isPlaying) {
   musicLabel.textContent = isPlaying ? "Pause music" : "Play music";
 }
 
+let musicTogglePointerHandled = false;
+
+musicToggle.addEventListener("pointerdown", () => {
+  if (!weddingAudio.paused) {
+    musicTogglePointerHandled = false;
+    return;
+  }
+  musicTogglePointerHandled = true;
+  startWeddingMusic(true);
+}, { passive: true });
+
 musicToggle.addEventListener("click", async () => {
+  if (musicTogglePointerHandled) {
+    musicTogglePointerHandled = false;
+    return;
+  }
   if (weddingAudio.paused) {
     try {
       await weddingAudio.play();
@@ -120,17 +135,6 @@ musicToggle.addEventListener("click", async () => {
 weddingAudio.addEventListener("play", () => updateMusicButton(true));
 weddingAudio.addEventListener("pause", () => updateMusicButton(false));
 weddingAudio.addEventListener("error", () => showToast("The invitation sound could not be loaded."));
-
-function syncInvitationVideo() {
-  if (!invitationVideo) return;
-  invitationVideo.muted = true;
-  invitationVideo.volume = 0;
-  if (Number.isFinite(weddingAudio.currentTime) && Number.isFinite(invitationVideo.duration) && invitationVideo.duration > 0) {
-    const usableDuration = Math.max(0.1, invitationVideo.duration - videoTrimTailSeconds);
-    invitationVideo.currentTime = weddingAudio.currentTime % usableDuration;
-  }
-  invitationVideo.play().catch(() => {});
-}
 
 function playInvitationVideo() {
   if (!invitationVideo) return;
@@ -150,20 +154,10 @@ if (invitationVideo) {
     }
   };
   invitationVideo.addEventListener("timeupdate", trimVideoTail);
-  invitationVideo.addEventListener("loadedmetadata", syncInvitationVideo);
   invitationVideo.addEventListener("canplay", playInvitationVideo);
   invitationVideo.addEventListener("loadeddata", playInvitationVideo);
   playInvitationVideo();
-  if ("IntersectionObserver" in window) {
-    const videoObserver = new IntersectionObserver((entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) syncInvitationVideo();
-        else invitationVideo.pause();
-      });
-    }, { threshold: 0.2 });
-    videoObserver.observe(invitationVideo);
-  }
-  weddingAudio.addEventListener("play", syncInvitationVideo);
+  window.addEventListener("pageshow", playInvitationVideo, { passive: true });
 }
 
 let autoPlayAttempted = false;
