@@ -132,6 +132,13 @@ function syncInvitationVideo() {
   invitationVideo.play().catch(() => {});
 }
 
+function playInvitationVideo() {
+  if (!invitationVideo) return;
+  invitationVideo.muted = true;
+  invitationVideo.volume = 0;
+  invitationVideo.play().catch(() => {});
+}
+
 if (invitationVideo) {
   invitationVideo.muted = true;
   invitationVideo.volume = 0;
@@ -143,7 +150,10 @@ if (invitationVideo) {
     }
   };
   invitationVideo.addEventListener("timeupdate", trimVideoTail);
-  invitationVideo.play().catch(() => {});
+  invitationVideo.addEventListener("loadedmetadata", syncInvitationVideo);
+  invitationVideo.addEventListener("canplay", playInvitationVideo);
+  invitationVideo.addEventListener("loadeddata", playInvitationVideo);
+  playInvitationVideo();
   if ("IntersectionObserver" in window) {
     const videoObserver = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -175,10 +185,16 @@ if (document.readyState === "loading") {
 }
 
 // Browsers block audible autoplay until the visitor interacts with the page.
-// Start automatically on the first scroll/touch so no music-button click is needed.
-const startMusicFromFirstGesture = () => startWeddingMusic(true);
-window.addEventListener("scroll", startMusicFromFirstGesture, { once: true, passive: true });
-window.addEventListener("pointerdown", startMusicFromFirstGesture, { once: true, passive: true });
+// Start on the first scroll, tap, touch, or key press so the music button is optional.
+const startMusicFromFirstGesture = (event) => {
+  const target = event?.target;
+  if (target && typeof target.closest === "function" && target.closest("#musicToggle")) return;
+  startWeddingMusic(true);
+};
+window.addEventListener("scroll", startMusicFromFirstGesture, { passive: true });
+window.addEventListener("pointerdown", startMusicFromFirstGesture, { passive: true });
+window.addEventListener("touchstart", startMusicFromFirstGesture, { passive: true });
+window.addEventListener("keydown", startMusicFromFirstGesture, { passive: true });
 
 if ("IntersectionObserver" in window) {
   const observer = new IntersectionObserver((entries) => {
