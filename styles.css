@@ -180,10 +180,10 @@ h1 em, h2 em { color: var(--rose-500); font-weight: 500; background: linear-grad
 @keyframes bandGradient { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 .story-photo { position: relative; min-height: 570px; margin: 60px 0 60px 7vw; overflow: hidden; background: #321832; }
 .story-photo::before { content: ""; position: absolute; z-index: 2; inset: 14px; border: 1px solid rgba(247, 198, 171, .45); opacity: var(--focus-glow, .45); pointer-events: none; animation: borderGlow 6s ease-in-out infinite; }
-.story-photo::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(45, 17, 44, .02), rgba(45, 17, 44, .5)); mix-blend-mode: multiply; }
-.story-photo img { width: 100%; height: 100%; min-height: 570px; object-fit: cover; object-position: 58% center; opacity: 1; mix-blend-mode: normal; filter: saturate(1.04) contrast(1.02); transform: scale(1.04); animation: photoDrift 12s ease-in-out infinite alternate; }
+.story-photo::after { content: ""; position: absolute; z-index: 2; inset: 0; background: linear-gradient(90deg, rgba(45, 17, 44, .02), rgba(45, 17, 44, .18)); opacity: .42; mix-blend-mode: multiply; pointer-events: none; }
+.story-photo img { position: relative; z-index: 1; display: block; width: 100%; height: 100%; min-height: 570px; object-fit: cover; object-position: 58% center; opacity: 1; mix-blend-mode: normal; filter: saturate(1.04) contrast(1.02); transform: scale(1.04); animation: photoDrift 12s ease-in-out infinite alternate; }
 @keyframes photoDrift { 0% { transform: scale(1.04) translate3d(-1%, 0, 0); } 100% { transform: scale(1.1) translate3d(1%, -1%, 0); } }
-.story-photo-label { position: absolute; z-index: 1; left: 28px; bottom: 25px; right: 28px; display: flex; justify-content: space-between; color: #fff7f4; font-size: 9px; letter-spacing: .16em; line-height: 1.5; text-transform: uppercase; }
+.story-photo-label { position: absolute; z-index: 3; left: 28px; bottom: 25px; right: 28px; display: flex; justify-content: space-between; color: #fff7f4; font-size: 9px; letter-spacing: .16em; line-height: 1.5; text-transform: uppercase; }
 .story-photo-label span:first-child { color: #f7c6ab; font-family: var(--display); font-size: 16px; }
 .story-copy { position: relative; padding: 124px clamp(40px, 8vw, 130px) 90px; overflow: hidden; }
 .story-copy::before { content: ""; position: absolute; z-index: 0; width: 360px; height: 360px; right: -150px; bottom: -160px; border-radius: 50%; background: radial-gradient(circle, rgba(244, 201, 130, .2), rgba(244, 201, 130, 0) 68%); animation: goldGlow 8s ease-in-out infinite alternate; pointer-events: none; }
