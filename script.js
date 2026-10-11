@@ -133,6 +133,35 @@ weddingAudio.addEventListener("play", () => updateMusicButton(true));
 weddingAudio.addEventListener("pause", () => updateMusicButton(false));
 weddingAudio.addEventListener("error", () => showToast("The invitation sound could not be loaded."));
 
+let backToBeginningFrame;
+document.querySelectorAll('a[href="#home"]').forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    window.cancelAnimationFrame(backToBeginningFrame);
+    history.replaceState(null, "", "#home");
+
+    if (prefersReducedMotion) {
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    const startY = window.scrollY;
+    const duration = 1050;
+    const startedAt = performance.now();
+    const easeInOut = (value) => value < 0.5
+      ? 4 * value * value * value
+      : 1 - Math.pow(-2 * value + 2, 3) / 2;
+
+    const animateBackToBeginning = (now) => {
+      const progress = Math.min((now - startedAt) / duration, 1);
+      window.scrollTo(0, startY * (1 - easeInOut(progress)));
+      if (progress < 1) backToBeginningFrame = window.requestAnimationFrame(animateBackToBeginning);
+    };
+
+    backToBeginningFrame = window.requestAnimationFrame(animateBackToBeginning);
+  });
+});
+
 function playInvitationVideo() {
   if (!invitationVideo) return;
   invitationVideo.muted = true;
