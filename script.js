@@ -117,7 +117,8 @@ async function toggleWeddingMusic(event) {
   }
   if (weddingAudio.paused) {
     try {
-      await startWeddingMusic(true);
+      const started = await startWeddingMusic(true);
+      if (!started) showToast("Tap Play music once more to start the invitation sound.");
     } catch {
       showToast("Tap Play music once more to start the invitation sound.");
     }
@@ -158,14 +159,17 @@ if (invitationVideo) {
 
 let autoPlayAttempted = false;
 async function startWeddingMusic(fromUserGesture = false) {
-  if ((!fromUserGesture && autoPlayAttempted) || !weddingAudio.paused) return;
+  if ((!fromUserGesture && autoPlayAttempted) || !weddingAudio.paused) return true;
   autoPlayAttempted = true;
   try {
+    if (weddingAudio.readyState === 0) weddingAudio.load();
     await weddingAudio.play();
     weddingAudio.dataset.userStarted = fromUserGesture ? "true" : weddingAudio.dataset.userStarted || "false";
     updateMusicButton(true);
+    return true;
   } catch {
     if (!fromUserGesture) showToast("Scroll once to start the invitation sound.");
+    return false;
   }
 }
 
