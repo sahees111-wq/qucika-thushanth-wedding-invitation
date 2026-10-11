@@ -106,32 +106,28 @@ function updateMusicButton(isPlaying) {
   musicLabel.textContent = isPlaying ? "Pause music" : "Play music";
 }
 
-let musicTogglePointerHandled = false;
+let lastTouchToggle = 0;
 
-musicToggle.addEventListener("pointerdown", () => {
-  if (!weddingAudio.paused) {
-    musicTogglePointerHandled = false;
-    return;
-  }
-  musicTogglePointerHandled = true;
-  startWeddingMusic(true);
-}, { passive: true });
-
-musicToggle.addEventListener("click", async () => {
-  if (musicTogglePointerHandled) {
-    musicTogglePointerHandled = false;
+async function toggleWeddingMusic(event) {
+  if (event?.type === "touchend") {
+    event.preventDefault();
+    lastTouchToggle = Date.now();
+  } else if (Date.now() - lastTouchToggle < 700) {
     return;
   }
   if (weddingAudio.paused) {
     try {
-      await weddingAudio.play();
+      await startWeddingMusic(true);
     } catch {
       showToast("Tap Play music once more to start the invitation sound.");
     }
   } else {
     weddingAudio.pause();
   }
-});
+}
+
+musicToggle.addEventListener("touchend", toggleWeddingMusic, { passive: false });
+musicToggle.addEventListener("click", toggleWeddingMusic);
 weddingAudio.addEventListener("play", () => updateMusicButton(true));
 weddingAudio.addEventListener("pause", () => updateMusicButton(false));
 weddingAudio.addEventListener("error", () => showToast("The invitation sound could not be loaded."));
@@ -166,6 +162,7 @@ async function startWeddingMusic(fromUserGesture = false) {
   autoPlayAttempted = true;
   try {
     await weddingAudio.play();
+    weddingAudio.dataset.userStarted = fromUserGesture ? "true" : weddingAudio.dataset.userStarted || "false";
     updateMusicButton(true);
   } catch {
     if (!fromUserGesture) showToast("Scroll once to start the invitation sound.");
@@ -189,6 +186,12 @@ window.addEventListener("scroll", startMusicFromFirstGesture, { passive: true })
 window.addEventListener("pointerdown", startMusicFromFirstGesture, { passive: true });
 window.addEventListener("touchstart", startMusicFromFirstGesture, { passive: true });
 window.addEventListener("keydown", startMusicFromFirstGesture, { passive: true });
+
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && weddingAudio.dataset.userStarted === "true" && weddingAudio.paused) {
+    weddingAudio.play().catch(() => {});
+  }
+});
 
 if ("IntersectionObserver" in window) {
   const observer = new IntersectionObserver((entries) => {
