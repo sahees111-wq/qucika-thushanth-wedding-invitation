@@ -140,11 +140,6 @@ document.querySelectorAll('a[href="#home"]').forEach((link) => {
     window.cancelAnimationFrame(backToBeginningFrame);
     history.replaceState(null, "", "#home");
 
-    if (prefersReducedMotion) {
-      window.scrollTo(0, 0);
-      return;
-    }
-
     const startY = window.scrollY;
     const duration = 1050;
     const startedAt = performance.now();
